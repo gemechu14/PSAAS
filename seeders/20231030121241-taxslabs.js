@@ -17,7 +17,7 @@ module.exports = {
         },
         {
           from_Salary: 601,
-          to_Salary: 1650,
+          to_Salary: 1650, 
           income_tax_payable: 10,
           deductible_Fee: 50,
           companyId: 1,

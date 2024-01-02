@@ -2,31 +2,66 @@ const { Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../database/db.js");
 const bcrypt = require("bcrypt");
 
+
 const Company = sequelize.define("Company", {
-  name: {
+  organizationName: {
     type: DataTypes.STRING,
     allowNull: false,
+    unique: {
+      msg: 'Organization name must be unique.',
+    },
+  },
+  companyCode: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: {
+      msg: 'Company code must be unique.',
+    },
+  },
+  
+  phoneNumber: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: {
+      msg: 'Phone number must be unique.',
+    },
   },
   numberOfEmployees: {
     type: DataTypes.INTEGER,
     allowNull: false,
   },
-  status: {
-    type: DataTypes.ENUM,
-    values: ["pending", "active", "blocked", "denied"],
-    defaultValue: "pending",
-  },
-  fullName: {
+  regionOrCity: {
     type: DataTypes.STRING,
-    allowNull: false,
   },
+ 
   email: {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  password: {
+  
+  fax: {
+    type: DataTypes.STRING,
+  },
+  streetAddress: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  accountNumber: {
+    type: DataTypes.STRING,
+    // unique: {
+    //   msg: 'account number must be unique.',
+    // },
+  },
+    status: {
+    type: DataTypes.ENUM,
+    values: ["pending", "active", "blocked", "denied"],
+    defaultValue: "pending",
+  },
+    
+ 
+  password: {
+    type: DataTypes.STRING,
+    // allowNull: false,
   },
   color: {
     type: DataTypes.STRING,
@@ -34,11 +69,6 @@ const Company = sequelize.define("Company", {
   },
   companyLogo: {
     type: DataTypes.STRING,
-  },
-
-  phoneNumber: {
-    type: DataTypes.STRING,
-    allowNull: false,
   },
 
   role: {
@@ -49,10 +79,7 @@ const Company = sequelize.define("Company", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  companyCode: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  
   country: {
     type: DataTypes.STRING,
     defaultValue: "Ethiopia",
@@ -67,61 +94,69 @@ const Company = sequelize.define("Company", {
   companyBanner: {
     type: DataTypes.STRING,
   },
-  primary_Color: {
+  primaryColor: {
     type: DataTypes.STRING,
   },
-  primary_Font_Color: {
+  primaryFontColor: {
     type: DataTypes.STRING,
   },
-  primary_Gradient_Color: {
+  primaryGradientColor: {
     type: DataTypes.STRING,
   },
-  secondary_Color: {
+  secondaryColor: {
     type: DataTypes.STRING,
   },
-  secondary_Font_Color: {
+  secondaryFontColor: {
     type: DataTypes.STRING,
   },
-  social_Media_Images: {
+  socialMediaImages: {
     type: DataTypes.BOOLEAN,
 
     defaultValue: false,
   },
-  region_or_City: {
-    type: DataTypes.STRING,
-  },
-  fax: {
-    type: DataTypes.STRING,
-  },
-  address_Street: {
-    type: DataTypes.STRING,
-  },
+ 
+ 
   notes: {
     type: DataTypes.STRING,
   },
 });
-
-Company.beforeCreate((company, options) => {
-  const saltRounds = 10;
-  return bcrypt
-    .hash(company.password, saltRounds)
-    .then((hash) => {
+Company.beforeCreate(async (company, options) => {
+  if (company.password) {
+    const saltRounds = 10;
+    try {
+      const hash = await bcrypt.hash(company.password, saltRounds);
       company.password = hash;
-    })
-    .catch((err) => {
+    } catch (err) {
+      console.error(err);
       throw new Error(err);
-    });
+    }
+  }
 });
+
+
+// Company.beforeCreate((company, options) => {
+//   const saltRounds = 10;
+//   return bcrypt
+//     .hash(company?.password, saltRounds)
+//     .then((hash) => {
+//       company.password = hash;
+//     })
+//     .catch((err) => {
+//       console.error(err);
+//       throw new Error(err);
+//     });
+// });
 
 Company.beforeUpdate((company, options) => {
   if (company.changed("password")) {
     const saltRounds = 10;
     return bcrypt
-      .hash(company.password, saltRounds)
+      .hash(company?.password, saltRounds)
       .then((hash) => {
         company.password = hash;
       })
       .catch((err) => {
+        console.error(err);
         throw new Error(err);
       });
   }

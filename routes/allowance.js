@@ -1,6 +1,6 @@
 const express = require("express");
 const allowance = require("../controllers/allowance");
-const middleware=require("../middleware/auth.js")
+const middleware=require("../middleware/auth.js");
 const router = express.Router();
 
 router.get(

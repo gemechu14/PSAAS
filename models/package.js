@@ -7,14 +7,20 @@ const Package = sequelize.define("Package", {
     type: DataTypes.ENUM("Custom", "Gold", "Platinium"),
     allowNull: false,
     validate: {
-      isIn: [['Custom', 'Gold','Platinium']],
+      isIn: {
+        args: [['Custom', 'Gold', 'Platinium']],
+        msg: 'Invalid value for packageName. Must be one of: Custom, Gold, Platinium',
+      },
     },
   },
   packageType:{
     type: DataTypes.ENUM("Yearly", "Monthly"),
     allowNull: false,
     validate: {
-      isIn: [['Yearly', 'Monthly']],
+      isIn: {
+        args: [['Yearly', 'Monthly']],
+        msg: 'Invalid value for packageType. Must be one of: Yearly, Monthly',
+      },
     },
   },
   ///
@@ -27,10 +33,10 @@ const Package = sequelize.define("Package", {
   max_employee: {
     type: DataTypes.INTEGER,
   },
-  service: {
-    type: DataTypes.JSON, // Use JSON type for storing JSON data
-    defaultValue: [], // Default value as an empty array
-  },
+  // service: {
+  //   type: DataTypes.JSON, // Use JSON type for storing JSON data
+  //   defaultValue: [], // Default value as an empty array
+  // },
   discount: {
     type: DataTypes.INTEGER,
     defaultValue: 0,
@@ -43,6 +49,6 @@ const Package = sequelize.define("Package", {
 
 // Define a one-to-many association between PackageModel and ServiceModel
 // Package.hasMany(ServiceModel, { as: 'services' });
-
+Package.hasMany(ServiceModel);
 
 module.exports = Package;
