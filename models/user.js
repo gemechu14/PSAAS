@@ -19,13 +19,18 @@ const User = sequelize.define("User", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  AccountNumber: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+  // AccountNumber: {
+  //   type: DataTypes.STRING,
+  //   allowNull: false,
+  // },
+
   role: {
-    type: DataTypes.STRING,
+    type: DataTypes.ENUM,
+    values: ['superAdmin', 'admin'],
     defaultValue: "superAdmin",
+    validate: {
+      isIn: [["superAdmin",'admin']],
+    },
   },
 });
 

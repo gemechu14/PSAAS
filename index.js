@@ -3,10 +3,8 @@ const { Worker } = require("worker_threads");
 const cors = require("cors");
 const run = require("./utils/checkSubscriptionPlan");
 
-
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger'); // Path to your Swagger configuration file
-
 
 
 require("dotenv").config();
@@ -96,56 +94,56 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(cookieParser());
-app.use("/user", userRouter);
-app.use("/company", companyRouter);
-app.use("/package", packageRouter);
-app.use("/taxslab", taxslabRouter);
-app.use("/pension", pensionRouter);
-app.use("/department", deptRouter);
-app.use("/subscription", subscriptionRouter);
-app.use("/login", authRouter);
-app.use("/employee", employeeRouter);
-app.use("/companyIdFormat", companyIdRouter);
-app.use("/allowancedefinition", allowanceDefinition);
-app.use("/allowance", allowance);
-app.use("/deductiondefinition", deductionDefinition);
-app.use("/loanDefinition", loanDefinition);
-app.use("/loan", loanRoute);
-app.use("/deduction", deduction);
-app.use("/grade", grade);
-app.use("/approver", approver);
-app.use("/payroll", payrollRouter);
-app.use("/approvalmethod", approvalMethod);
-app.use("/payrollDefinition", payrollDefinition);
-app.use("/PayrollApprovement", payrollApprovement);
-app.use("/customRole", customRoleRouter);
-app.use("/companyAccInfo", companyAccountInfoRouter);
-app.use("/employeeAccInfo", employeeAccountInfoRouter);
-app.use("/additionalDeductionDefinition", additionalDeductionDefinition);
-app.use("/additionalDeduction", additionalDeduction);
-app.use("/additionalAllowanceDefinition", additionalAllowanceDefinition);
-app.use("/additionalAllowance", additionalAllowance);
-app.use("/providentFund", providentFund);
-app.use("/newPayroll", newPayroll);
-app.use("/module", moduleRoute);
-app.use("/address", addressRoute);
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/company", companyRouter);
+app.use("/api/v1/package", packageRouter);
+app.use("/api/v1/taxslab", taxslabRouter);
+app.use("/api/v1/pension", pensionRouter);
+app.use("/api/v1/departments", deptRouter);
+app.use("/api/v1/subscription", subscriptionRouter);
+app.use("/", authRouter);
+app.use("/api/v1/employee", employeeRouter);
+app.use("/api/v1/companyIdFormat", companyIdRouter);
+app.use("/api/v1/allowancedefinition", allowanceDefinition);
+app.use("/api/v1/allowance", allowance);
+app.use("/api/v1/deductiondefinition", deductionDefinition);
+app.use("/api/v1/loanDefinition", loanDefinition);
+app.use("/api/v1/loan", loanRoute);
+app.use("/api/v1/deduction", deduction);
+app.use("/api/v1/grade", grade);
+app.use("/api/v1/approver", approver);
+app.use("/api/v1/payroll", payrollRouter);
+app.use("/api/v1/approvalmethod", approvalMethod);
+app.use("/api/v1/payrollDefinition", payrollDefinition);
+app.use("/api/v1/PayrollApprovement", payrollApprovement);
+app.use("/api/v1/customRole", customRoleRouter);
+app.use("/api/v1/companyAccInfo", companyAccountInfoRouter);
+app.use("/api/v1/employeeAccInfo", employeeAccountInfoRouter);
+app.use("/api/v1/additionalDeductionDefinition", additionalDeductionDefinition);
+app.use("/api/v1/additionalDeduction", additionalDeduction);
+app.use("/api/v1/additionalAllowanceDefinition", additionalAllowanceDefinition);
+app.use("/api/v1/additionalAllowance", additionalAllowance);
+app.use("/api/v1/providentFund", providentFund);
+app.use("/api/v1/newPayroll", newPayroll);
+app.use("/api/v1/module", moduleRoute);
+app.use("/api/v1/address", addressRoute);
 
-app.use("/employeePayrollApprovement", employeePayrollApprovement);
-app.use("/payment", ebirrPayment);
+app.use("/api/v1/employeePayrollApprovement", employeePayrollApprovement);
+app.use("/api/v1/payment", ebirrPayment);
 // app.use("/s1", stripePayment);
-app.use("/employeePayrollApprovement", employeePayrollApprovement);
-app.use("/additionalPay", additionalPayDefinition);
-app.use("/additionalpayment", additionalPay);
-app.use("/payment", ebirrPayment);
+app.use("/api/v1/employeePayrollApprovement", employeePayrollApprovement);
+app.use("/api/v1/additionalPay", additionalPayDefinition);
+app.use("/api/v1/additionalpayment", additionalPay);
+app.use("/api/v1/payment", ebirrPayment);
 // app.use("/employeePromotion", employeePromotion);
 
 const swaggerOptions = {
   swaggerOptions: {
-    url: 'http://localhost:6000/api-docs/swagger.json', // Update the URL to match your setup
+    url: 'http://localhost:4114/api/v1/api-docs/swagger.json', // Update the URL to match your setup
   },
 };
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec,swaggerOptions));
+app.use('/api/v1/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec,swaggerOptions));
 
 
 app.use((req, res, next) => {
@@ -186,7 +184,7 @@ const runComputation = async (payrolls) => {
 
 let isRunning = false;
 
-app.listen(process.env.PORT ||6000, () => {
+app.listen(process.env.PORT ||4114, () => {
  
   cron.schedule("*/5 * * * * * * *", async () => {
     if (!isRunning) {

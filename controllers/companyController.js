@@ -225,6 +225,7 @@ exports.createCompany1 = async (req, res, next) => {
       // additionalAllowance: additionalAllowances,
     })
   } catch (error) {
+    console.log(error);
     return next(createError.createError(500, 'Internal server error'))
   }
 }
@@ -233,6 +234,7 @@ exports.createCompany = async (req, res, next) => {
   const transaction = await sequelize.transaction();
 
   try {
+   
     const { packageId, duration, ...companyData } = req.body;
 
     const existingCompany = await Company.findOne({
@@ -249,7 +251,7 @@ exports.createCompany = async (req, res, next) => {
       // await transaction.rollback();
       return next(createError.createError(409, 'Email or companyCode already exists'));
     }
-
+  
     const package = await Package.findByPk(packageId);
 
     if (!package) {
@@ -268,7 +270,7 @@ exports.createCompany = async (req, res, next) => {
 
     const currentDate = moment();
     const subscription = await Subscription.create(
-      { duration },
+      { duration:1 },
       { transaction }
     );
 
@@ -277,10 +279,11 @@ exports.createCompany = async (req, res, next) => {
 
     const nextPaymentDate = await calculateNextPayment({
       chargeType: package.packageType,
-      duration,
+      duration:1,
       normalDate: Date.now()
     });
 
+    console.log(nextPaymentDate);
     const leftPaymentDate = nextPaymentDate.diff(currentDate, 'days');
 
     await subscription.update(
@@ -381,9 +384,9 @@ exports.createCompany = async (req, res, next) => {
       message: 'Created successfully'
     });
   } catch (error) {
-    // await transaction.rollback();
+    await transaction.rollback();
     console.error('Error:', error);
-    return next(createError.createError(500, 'Internal server error'));
+    return next(createError.createError(500, error.message));
   }
 };
 
@@ -420,9 +423,10 @@ exports.getAllCompany = async (req, res, next) => {
       return company
     })
     return res.json({
-      count: companies.length,
+      success:true,
 
-      companies
+      message:"Data found",
+      data: companies
     })
   } catch (error) {
     return next(createError.createError(500, 'Internal server error'))
@@ -439,7 +443,12 @@ exports.getCompanyById = async (req, res, next) => {
     if (!company) {
       return next(createError.createError(404, 'Company does not exist'))
     } else {
-      return res.json(company)
+      return res.status(200).json({
+        success:true,
+        message:"Data found",
+        data: company
+      })
+    
     }
   } catch (error) {
     return next(createError.createError(500, 'Internal server error'))
@@ -451,7 +460,7 @@ exports.updateCompany = async (req, res, next) => {
   const body = req.body
 
   try {
-    const company = await Company.findByPk(Number(id))
+    const company = await Company.findByPk(Number(req.user.id))
     if (!company) {
       return next(createError.createError(404, 'Company does not exist'))
     } else {
@@ -500,7 +509,13 @@ exports.deleteCompany = async (req, res, next) => {
 
       return res
         .status(200)
-        .json(successResponse.createSuccess('company deleted successfully'))
+        .json(
+          {
+            success:true,
+            message: 'Company deleted successfully',
+            data: company
+          }
+        )
     }
   } catch (error) {
     return next(createError.createError(500, 'Internal server error'))
@@ -514,8 +529,9 @@ exports.getAllActiveCompany = async (req, res, next) => {
       where: { status: 'active' }
     })
     res.status(200).json({
-      count: activeCompany.length,
-      activeCompany
+      success:true,
+      message: 'Data found',
+      data:activeCompany
     })
   } catch (error) {
     return next(createError.createError(500, 'Internal server error'))
@@ -575,20 +591,53 @@ exports.getAllDeniedCompany = async (req, res, next) => {
 //GET LEFT DATE
 exports.getSubscriptionLeftDate = async (req, res, next) => {
   try {
-    const companyId = req.params.companyId
+   
     const currentDate = moment()
-
+console.log(req.user.id)
     const subscriptionLeftDate = await Subscription.findOne({
-      where: { companyId: companyId }
+      where: { companyId: req.user.id }
     })
 
     const nextPaymentDate = moment(subscriptionLeftDate.nextPaymentDate)
+    console.log(nextPaymentDate)
     const startDate = moment(subscriptionLeftDate.createdAt)
-    const diff = nextPaymentDate.diff(currentDate, 'days')
+    const diff = nextPaymentDate.diff(startDate, 'days')
     return res.status(200).json({
       Subscription_left_date: diff
     })
   } catch (error) {
+    console.log(error)
     return next(createError.createError(500, 'Internal server error'))
   }
 }
+exports.getCompanyProfile = async (req, res, next) => {
+  try {
+    console.log("Internal server error")
+    const company= await Company.findByPk(Number(req.user.id));
+    return res.status(200).json({
+      success:true,
+      message:"Data found",
+      data:{company}
+    })
+    
+  } catch (error) {
+    console.log("Internal server error")
+    console.log(error)
+    return next(createError.createError(500, 'Internal server error'));
+  }
+}
+// Controller for password update
+exports.updatePassword = async (req, res, next) => {
+  const {  newPassword } = req.body;
+
+  try {
+    // Update the user's password in the database
+    // Replace the following line with your actual database update logic
+    await Company.update({ password: newPassword }, { where: { id: req.user.id } });
+
+    return res.status(200).json({ success: true, message: 'Password updated successfully.' });
+  } catch (error) {
+    console.error('Error updating password:', error);
+    return next(createError.createError(500, 'Internal server error'));
+  }
+};

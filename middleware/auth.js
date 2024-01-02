@@ -6,14 +6,16 @@ const Employee = require("../models/employee");
 const CustomRole = require("../models/customRole");
 const Permission = require("../models/permission.js");
 const createError = require('.././utils/error.js'); 
+const bcrypt=require('bcrypt');
 
 exports.protectAll = async (req, res, next) => {
   try {
     //getting token check if its there
     let token;
+
     if (
       req.headers.authorization &&
-      req.headers.authorization.startsWith("Bearer")
+      req.headers.authorization?.startsWith("Bearer")
     ) {
       token = req.headers.authorization.split(" ")[1];
     } else if (req.cookies.jwt) {
@@ -31,8 +33,12 @@ exports.protectAll = async (req, res, next) => {
 
     //check if user still exists
     let currentUser;
+   
 
     if (decoded.role === "superAdmin") {
+   
+      const user1= await User.findByPk(1);
+
       currentUser = await User.findByPk(Number(decoded.id));
     } else if (decoded.role === "companyAdmin") {
       currentUser = await Company.findByPk(Number(decoded.id));
@@ -44,7 +50,7 @@ exports.protectAll = async (req, res, next) => {
 
     // console.log(JSON.stringify(currentUser), null, 4);
     if (!currentUser) {
-      return next(createError.createError(401,  `${currentUser.role} does not longer exists ` ));
+      return next(createError.createError(401,  `currentUser does not longer exists ` ));
       
     }
     //check if user change password after jwt was issued
@@ -137,7 +143,9 @@ exports.restrictALL = ({ moduleName, isAccessible }) => {
       });
 
       if (!employee) {
-        return res.status(404).json({ message: "Employee not found." });
+        return res.status(404).json({success:true,
+          
+          message: "Employee not found." });
       }
 
 // console.log("first", employee.CustomRole.Permissions);
@@ -208,4 +216,31 @@ exports.restrictApprover = ({ moduleName, isAccessible }) => {
       }
     }
   };
+};
+
+
+exports.validatePasswordUpdate =async (req, res, next) => {
+
+  const company = await Company.findByPk(req.user.id);
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+console.log("currentpassword", currentPassword);
+
+if (!company || !(await bcrypt.compare(currentPassword, company.password))) {
+  return next(
+    createError.createError(
+      401,
+      'Current password is incorrect'
+    )
+  )}
+  // Validate logic (check if currentPassword is correct, newPassword matches confirmPassword, etc.)
+
+  // Example validation (replace with your logic)
+  // if (currentPassword !== 'abdi1000') {
+  //   return res.status(400).json({ error: 'Current password is incorrect.' });
+  // }
+
+  if (newPassword !== confirmPassword) {
+    return res.status(400).json({ error: 'New password and confirmation do not match.' });
+  }
+  next();
 };

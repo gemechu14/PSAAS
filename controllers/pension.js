@@ -1,4 +1,6 @@
 const Pension = require("../models/pension.js");
+const createError = require('.././utils/error.js');
+const successResponse = require('.././utils/successResponse.js')
 
 // Define controller methods for handling User requests
 exports.getAllPension = async (req, res) => {
@@ -21,23 +23,7 @@ exports.getAllPension = async (req, res) => {
       });
     }
   } catch (error) {
-    if (error.name === "SequelizeValidationError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} is required`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else if (error.name === "SequelizeUniqueConstraintError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} must be unique`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else {
-      return res.status(500).json({ message: "Internal server error" });
-    }
+    return next(createError.createError(500,"Internal server error"));
   }
 };
 
@@ -47,23 +33,7 @@ exports.getpensionById = async (req, res) => {
     const pension = await Pension.findByPk(id);
     res.json(pension);
   } catch (error) {
-    if (error.name === "SequelizeValidationError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} is required`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else if (error.name === "SequelizeUniqueConstraintError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} must be unique`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else {
-      return res.status(500).json({ message: "Internal server error" });
-    }
+    return next(createError.createError(500,"Internal server error"));
   }
 };
 
@@ -96,7 +66,8 @@ exports.createPension = async (req, res, next) => {
         where: { companyId: req.user.id },
       });
       if (getAllPension.length != 0) {
-        res.status(409).json("Pension is already defined update it ");
+        return next(createError.createError(409,"Pension is already defined update it"));
+        
       } else {
         const pensions = await Pension.create({
           employerContribution,
@@ -111,23 +82,7 @@ exports.createPension = async (req, res, next) => {
     }
   } catch (error) {
     console.log("first", error);
-    if (error.name === "SequelizeValidationError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} is required`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else if (error.name === "SequelizeUniqueConstraintError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} must be unique`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else {
-      return res.status(500).json({ message: "Internal server error" });
-    }
+    return next(createError.createError(500,"Internal server error"));
   }
 };
 
@@ -199,23 +154,7 @@ exports.updatePension = async (req, res, next) => {
     }
   } catch (error) {
     console.log("first", error);
-    if (error.name === "SequelizeValidationError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} is required`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else if (error.name === "SequelizeUniqueConstraintError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} must be unique`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else {
-      return res.status(500).json({ message: "Internal server error" });
-    }
+    return next(createError.createError(500,"Internal server error"));
   }
 };
 
@@ -226,30 +165,14 @@ exports.deletePension = async (req, res, next) => {
     const pension = await Pension.findOne({ where: { id: id } });
     if (pension) {
       await Pension.destroy({ where: { id } });
-      return res.status(200).json({ message: "Deleted successfully" });
+      return res.status(200).json(successResponse.createSuccess("Deleted successfully"));
     } else {
       return res
         .status(409)
         .json({ message: "There is no pension with this ID" });
     }
   } catch (error) {
-    if (error.name === "SequelizeValidationError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} is required`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else if (error.name === "SequelizeUniqueConstraintError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} must be unique`];
-      });
-
-      return res.status(400).json({ message: errors });
-    } else {
-      return res.status(500).json({ message: "Internal server error" });
-    }
+    return next(createError.createError(500,"Internal server error"));
   }
 };
 
@@ -275,22 +198,6 @@ exports.getAllPensionIncludingInActive = async (req, res) => {
       });
     }
   } catch (error) {
-    if (error.name === "SequelizeValidationError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} is required`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else if (error.name === "SequelizeUniqueConstraintError") {
-      const errors = {};
-      error.errors.forEach((err) => {
-        errors[err.path] = [`${err.path} must be unique`];
-      });
-
-      return res.status(404).json({ message: errors });
-    } else {
-      return res.status(500).json({ message: "Internal server error" });
-    }
+    return next(createError.createError(500,"Internal server error"));
   }
 };
